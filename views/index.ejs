@@ -1,0 +1,170 @@
+<!-- views/pages/index.ejs -->
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>nodeJsnake</title>
+    <link rel="icon" type="image/png" href="/images/icons/favicon.ico" sizes="32x32" />
+    <style type="text/css">
+        * {
+            margin: 0;
+            padding: 0;
+        }
+
+        html {
+            height: 100%;
+        }
+
+        body {
+            background: -webkit-linear-gradient(top, white, #66cc33);
+            text-align: center;
+        }
+
+        .score {
+            font-family: "verdana";
+            font-size: 2em;
+            position: relative;
+            color: black;
+        }
+
+        .canvas {
+            border: 1px solid black;
+            display: block;
+            position: absolute;
+            margin: auto;
+            top: 0;
+            bottom: 0;
+            right: 0;
+            left: 0;
+            background-color: white
+        }
+    </style>
+    <script>
+        var canvas;
+        var ctx;
+        var fps = 1000;
+        var position = {
+            xCoordinate: 0,
+            yCoordinate: 0
+        }
+        var snake = {
+            body: new Array(position),
+            length: 0,
+        };
+        var food = {
+            xCoordinate: 0,
+            yCoordinate: 0
+        };
+        var direction = '';
+        var directionQueue = '';
+
+        function initGame() {
+            canvas = document.getElementById('canvas');
+            ctx = canvas.getContext("2d");
+            // makes canvas interactive upon load
+            canvas.setAttribute('tabindex', 1);
+            canvas.style.outline = 'none';
+            canvas.focus();
+            generateFood();
+            drawSnake();
+            loop();
+        };
+
+        function setBackground(color1, color2) {
+            ctx.fillStyle = color1;
+            ctx.strokeStyle = color2;
+
+            ctx.fillRect(0, 0, canvas.height, canvas.width);
+
+            for (let x = 0.5; x < canvas.width; x += cellSize) {
+                ctx.moveTo(x, 0);
+                ctx.lineTo(x, canvas.height);
+            }
+            for (let y = 0.5; y < canvas.height; y += cellSize) {
+                ctx.moveTo(0, y);
+                ctx.lineTo(canvas.width, y);
+            }
+
+            ctx.stroke();
+        };
+
+        function drawSquare(x, y, color) {
+            //let canvas = document.getElementById('canvas');
+            //let ctx = canvas.getContext("2d");
+            ctx.fillStyle = color;
+            let cellSize = 10;
+            ctx.fillRect(x, y, cellSize, cellSize);
+        };
+
+        function generateFood() {
+            //let canvas = document.getElementById('canvas');
+            let xCoordinate = Math.round((Math.random() * ((canvas.width - 10) - 0) + 0) / 10) * 10; //generates a random x coordinate.
+            let yCoordinate = Math.round((Math.random() * ((canvas.width - 10) - 0) + 0) / 10) * 10; //generates a random y coordinate.
+            drawSquare(xCoordinate, yCoordinate, "green");
+        };
+
+        function drawSnake() {
+            for (i = 0; i < snake.body.length; i++) {
+                //Draws the snake
+                drawSquare(snake.body[i].xCoordinate, snake.body[i].yCoordinate, "red");
+            }
+            for (i = 0; i < snake.body.length; i++) {
+                snake.body[i].xCoordinate++;
+                snake.body[i].yCoordinate++;
+            }
+        }
+
+        function moveSnake() {
+            var xCoordinate = snake.body[0].xCoordinate;
+            var yCoordinate = snake.body[0].yCoordinate;
+
+            direction = directionQueue;
+
+            if (direction == 'right') {
+                xCoordinate += 10;
+            }
+            else if (direction == 'left') {
+                xCoordinate -= 10;
+            }
+            else if (direction == 'up') {
+                yCoordinate -= 10;
+            }
+            else if (direction == 'down') {
+                yCoordinate += 10;
+            }
+        }
+
+        function loop() {
+            canvas.onkeydown = function (evt) {
+                evt = evt || window.event;
+                changeDirection(evt.keyCode);
+            };
+            drawSnake();
+            changeDirection();
+            moveSnake();
+            setInterval(loop, fps);
+        }
+
+        function changeDirection(keycode) {
+            console.log("keyCode =", keycode);
+            if (keycode == 37 && direction != 'right')
+                directionQueue = 'left';
+            else if (keycode == 38 && direction != 'down')
+                directionQueue = 'up';
+            else if (keycode == 39 && direction != 'left')
+                directionQueue = 'right';
+            else if (keycode == 40 && direction != 'top')
+                directionQueue = 'down';
+        }
+
+    </script>
+</head>
+
+<body onload="initGame();">
+    <div class="score" id="score">0</div>
+    <canvas class="canvas" id="canvas" height="500px" width="500px"></canvas>
+</body>
+
+</html>
